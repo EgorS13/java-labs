@@ -23,7 +23,7 @@ public class FractalExplorer
     private FractalGenerator fractal;
 
     /**
-     * Объект, опредяляющий размер текущего диапазона просмотра
+     * Объект, определяющий размер текущего диапазона просмотра
      * (То, что показывается в настоящий момент)
      */
     private Rectangle2D.Double range;
@@ -60,10 +60,10 @@ public class FractalExplorer
         MouseHandler click = new MouseHandler();
         display.addMouseListener(click);
 
-        /** Set up a combo box. **/
+        /** Создание объекта combo-box **/
         JComboBox myComboBox = new JComboBox();
 
-        /** Add each fractal type object to the combo box. **/
+        /** Добавляем элементы в combo-box **/
         FractalGenerator mandelbrotFractal = new Mandelbrot();
         myComboBox.addItem(mandelbrotFractal);
         FractalGenerator tricornFractal = new Tricorn();
@@ -71,14 +71,14 @@ public class FractalExplorer
         FractalGenerator burningShipFractal = new BurningShip();
         myComboBox.addItem(burningShipFractal);
 
-        /** Instance of ButtonHandler on the combo box. **/
+        /** Обрабатывать нажатия будет ButtonHandler **/
         ButtonHandler fractalChooser = new ButtonHandler();
         myComboBox.addActionListener(fractalChooser);
 
         /**
-         * Create a new JPanel object, add a JLabel object and a JComboBox
-         * object to it, and add the panel into the frame in the NORTH
-         * position in the layout.
+         * Создаём панель и добавляем на неё combo-box.
+         * Добавляем также текст пояснения "Fractal:"
+         * Наконец, прописываем расположение этой панели наверху
          */
         JPanel myPanel = new JPanel();
         JLabel myLabel = new JLabel("Fractal:");
@@ -87,8 +87,7 @@ public class FractalExplorer
         Frame.add(myPanel, BorderLayout.NORTH);
 
         /**
-         * Create a save button, add it to a JPanel in the BorderLayout.SOUTH
-         * position along with the reset button.
+         * Создаём кнопку сохранения и добавляем её на созданную панель внизу
          */
         JButton saveButton = new JButton("Save");
         JPanel myBottomPanel = new JPanel();
@@ -96,7 +95,7 @@ public class FractalExplorer
         myBottomPanel.add(resetButton);
         Frame.add(myBottomPanel, BorderLayout.SOUTH);
 
-        /** Instance of ButtonHandler on the save button. **/
+        /** Обрабатывать события будет ButtonHandler **/
         ButtonHandler saveHandler = new ButtonHandler();
         saveButton.addActionListener(saveHandler);
 
@@ -145,73 +144,64 @@ public class FractalExplorer
         {
             String command = e.getActionCommand();
             /**
-             * If the source is the combo box, get the fractal the user
-             * selected and display it.
+             * Если нажатие на combo-box, берётся выбранный фрактал и выводится на дисплей
              */
             if (e.getSource() instanceof JComboBox) {
                 JComboBox mySource = (JComboBox) e.getSource();
                 fractal = (FractalGenerator) mySource.getSelectedItem();
                 fractal.getInitialRange(range);
                 drawFractal();
-
             }
             /**
-             * If the source is the reset button, reset the display and draw
-             * the fractal.
+             * Если нажатие на кнопку сброса, сбрасывает приближение
              */
             else if (command.equals("Reset")) {
                 fractal.getInitialRange(range);
                 drawFractal();
             }
             /**
-             * If the source is the save button, save the current fractal
-             * image.
+             * Если нажатие на кнопку сохранения, сохраняет текущее отображение фрактала
              */
             else if (command.equals("Save")) {
 
-                /** Allow the user to choose a file to save the image to. **/
                 JFileChooser myFileChooser = new JFileChooser();
 
-                /** Save only PNG images. **/
+                /** Сохраняет только PNG-изображения **/
                 FileFilter extensionFilter = new FileNameExtensionFilter("PNG Images", "png");
                 myFileChooser.setFileFilter(extensionFilter);
                 /**
-                 * Ensures that the filechooser won't allow non-".png"
-                 * filenames.
+                 * Удостоверяется, что filechooser не разрешит что-то, помимо *.png
                  */
                 myFileChooser.setAcceptAllFileFilterUsed(false);
 
                 /**
-                 * Pops up a "Save file" window which lets the user select a
-                 * directory and file to save to.
+                 * Открывает окно с возможностью выбора директории сохранения
                  */
                 int userSelection = myFileChooser.showSaveDialog(display);
 
                 /**
-                 * If the outcome of the file-selection operation is
-                 * APPROVE_OPTION, continue with the file-save operation.
+                 * Если пользователь решает таки сохранить файл, операция сохранения продолжается
                  */
                 if (userSelection == JFileChooser.APPROVE_OPTION) {
 
-                    /** Get the file and file name. **/
+                    /** Получает файл и имя файла **/
                     java.io.File file = myFileChooser.getSelectedFile();
                     String file_name = file.toString();
 
-                    /** Try saving the fractal image to disk. **/
+                    /** Пытается сохранить изображение на диск **/
                     try {
                         BufferedImage showImage = display.getImage();
                         javax.imageio.ImageIO.write(showImage, "png", file);
                     }
                     /**
-                     * Catches all exceptions and prints a message with the
-                     * exception.
+                     * Ловит все исключения и пишет сообщение об исключении
                      */
                     catch (Exception exception) {
                         JOptionPane.showMessageDialog(display, exception.getMessage(), "Cannot Save Image", JOptionPane.ERROR_MESSAGE);
                     }
                 }
                 /**
-                 * If the file-save operation is not APPROVE_OPTION, return.
+                 * Если пользователь передумал сохранять файл, return
                  */
                 else return;
             }

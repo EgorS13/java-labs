@@ -29,11 +29,18 @@ public class Mandelbrot extends FractalGenerator
         ComplexNums cxnum = new ComplexNums(x, y);
         while (iteration < MAX_ITERATIONS && ((cxnum.Zreal * cxnum.Zreal) + (cxnum.Zimaginary * cxnum.Zimaginary)) < 4)
         {
-            cxnum.Iteration();
+            cxnum.IterationMandelbrot();
             iteration++;
         }
         // Если достигнут максимум итераций (2000), возвращает -1
         if (iteration == MAX_ITERATIONS){ return -1; }
         else { return iteration; }
+    }
+
+    /**
+     * Возвращает имя фрактала "Mandelbrot"
+     */
+    public String toString() {
+        return "Mandelbrot";
     }
 }

@@ -18,12 +18,24 @@ public class ComplexNums {
     }
 
     /**
-     * Метод, осуществляющий подсчёт
+     * Методы, осуществляющий подсчёт
      */
-    public void Iteration(){
-        double Zrealupdated = (Zreal * Zreal) - (Zimaginary * Zimaginary) + x;
-        double Zimaginaryupdated = 2 * Zreal * Zimaginary + y;
-        Zreal = Zrealupdated;
-        Zimaginary = Zimaginaryupdated;
+    public void IterationMandelbrot(){
+        double ZrealUpdated = (Zreal * Zreal) - (Zimaginary * Zimaginary) + x;
+        double ZimaginaryUpdated = 2 * Zreal * Zimaginary + y;
+        Zreal = ZrealUpdated;
+        Zimaginary = ZimaginaryUpdated;
+    }
+    public void iterationTricorn(){
+        double ZrealUpdated = (Zreal * Zreal) - (Zimaginary * Zimaginary) + x;
+        double ZimaginaryUpdated = -2 * Zreal * Zimaginary + y;
+        Zreal = ZrealUpdated;
+        Zimaginary = ZimaginaryUpdated;
+    }
+    public void iterationBurningShip(){
+        double ZrealUpdated = Zreal * Zreal - Zimaginary * Zimaginary + x;
+        double ZimaginaryUpdated = 2 * Math.abs(Zreal) * Math.abs(Zimaginary) + y;
+        Zreal = ZrealUpdated;
+        Zimaginary = ZimaginaryUpdated;
     }
 }
