@@ -27,7 +27,6 @@ public class FractalExplorer
      * (То, что показывается в настоящий момент)
      */
     private Rectangle2D.Double range;
-
     /**
      * конструктор, принимающий размер дисплея и сохраняющий его,
      * после чего инициализирующий объекты диапазона и генератора фрактала
@@ -220,17 +219,17 @@ public class FractalExplorer
         @Override
         public void mouseClicked(MouseEvent e)
         {
-            // Принимает x координату нажатия
-            int x = e.getX();
-            double xCoord = fractal.getCoord(range.x, range.x + range.width, displaySize, x);
-            // Принимает y координату нажатия
-            int y = e.getY();
-            double yCoord = fractal.getCoord(range.y, range.y + range.height, displaySize, y);
+                // Принимает x координату нажатия
+                int x = e.getX();
+                double xCoord = fractal.getCoord(range.x, range.x + range.width, displaySize, x);
+                // Принимает y координату нажатия
+                int y = e.getY();
+                double yCoord = fractal.getCoord(range.y, range.y + range.height, displaySize, y);
 
-            fractal.recenterAndZoomRange(range, xCoord, yCoord, 0.5);
+                fractal.recenterAndZoomRange(range, xCoord, yCoord, 0.5);
 
-            // Перерисовывает фрактал после приближения
-            drawFractal();
+                // Перерисовывает фрактал после приближения
+                drawFractal();
         }
     }
 
