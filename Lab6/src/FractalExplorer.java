@@ -32,7 +32,23 @@ public class FractalExplorer
      */
     private int rowsRemaining;
     /**
-     * конструктор, принимающий размер дисплея и сохраняющий его,
+     * Поле с объектом кнопки сброса.
+     * Объявлено здесь для доступа к ней в разных методах класса.
+     */
+    private JButton resetButton;
+    /**
+     * Поле с объектом кнопки сохранения.
+     * Объявлено здесь для доступа к ней в разных методах класса.
+     */
+    private JButton saveButton;
+    /**
+     * Поле с объектом ComboBox (выпадающий список).
+     * Объявлено здесь для доступа к ней в разных методах класса.
+     */
+    private JComboBox myComboBox;
+
+    /**
+     * Конструктор, принимающий размер дисплея и сохраняющий его,
      * после чего инициализирующий объекты диапазона и генератора фрактала
      */
     public FractalExplorer(int size) {
@@ -54,8 +70,8 @@ public class FractalExplorer
         // Добавляет и центрует объект изображения
         Frame.add(display, BorderLayout.CENTER);
 
-        /** Создание объекта кнопки сброса **/
-        JButton resetButton = new JButton("Reset");
+        /** Кнопка сброса **/
+        resetButton = new JButton("Reset");
         Frame.add(resetButton, BorderLayout.SOUTH);
         ButtonHandler resetHandler = new ButtonHandler();
         // Обработка события нажатия на кнопку
@@ -64,7 +80,7 @@ public class FractalExplorer
         display.addMouseListener(click);
 
         /** Создание объекта combo-box **/
-        JComboBox myComboBox = new JComboBox();
+        myComboBox = new JComboBox();
 
         /** Добавляем элементы в combo-box **/
         FractalGenerator mandelbrotFractal = new Mandelbrot();
@@ -92,7 +108,7 @@ public class FractalExplorer
         /**
          * Создаём кнопку сохранения и добавляем её на созданную панель внизу
          */
-        JButton saveButton = new JButton("Save");
+        saveButton = new JButton("Save");
         JPanel myBottomPanel = new JPanel();
         myBottomPanel.add(saveButton);
         myBottomPanel.add(resetButton);
@@ -109,34 +125,28 @@ public class FractalExplorer
         Frame.setResizable(false);
 
     }
-
     /**
      * Вспомогательный метод для отображения фрактала.
-     * Он проходится по пикселям на дисплее и вычисляет количество итераций для координат во фрактале
+     * Этот метод проходит по каждой строке изображения и вызывает работу FractalWorker для каждой строки.
+     * Он же проходится по пикселям на дисплее и вычисляет количество итераций для координат во фрактале
      * Если кол-во итераций = -1, он устанавливает чёрный цвет пикселя,
      * иначе же выбирает значение в зависимости от количества итераций.
-     * Когда всё готово - обновляет дисплей
      */
-    private void drawFractal()
-    {
-        for (int x=0; x<displaySize; x++){
-            for (int y=0; y<displaySize; y++){
-                double xCoord = fractal.getCoord(range.x,
-                        range.x + range.width, displaySize, x);
-                double yCoord = fractal.getCoord(range.y,
-                        range.y + range.height, displaySize, y);
-                int i = fractal.numIterations(xCoord, yCoord);
-                if (i == -1){
-                    display.drawPixel(x, y, 0);
-                }
-                else{
-                    float hue = 0.7f + (float) i / 200f;
-                    int rgbColor = Color.HSBtoRGB(hue, 1f, 1f);
-                    display.drawPixel(x, y, rgbColor);
-                }
-            }
+    private void drawFractal(){
+        enableUI(false);
+        rowsRemaining = displaySize;
+        for (int x = 0; x < displaySize; x++){
+            FractalWorker drawRow = new FractalWorker(x);
+            drawRow.execute();
         }
-        display.repaint();
+    }
+    /**
+     * Метод выключения интерфейса во избежание ошибок параллельного доступа
+     */
+    public void enableUI(boolean b) {
+        saveButton.setEnabled(b);
+        resetButton.setEnabled(b);
+        myComboBox.setEnabled(b);
     }
     /**
      * Внутренний класс для обработки событий ActionListener
@@ -239,6 +249,51 @@ public class FractalExplorer
         }
     }
 
+    /**
+     * Внутренний класс-наследник от SwingWorker,
+     * используется для реализации многопоточных вычислений.
+     */
+    private class FractalWorker extends SwingWorker<Object, Object> {
+        private int yCoord;
+        private int[] rgb;
+
+        public FractalWorker(int y) {
+            this.yCoord = y;
+        }
+        /**
+         * Переопределение метода из SwingWorker,
+         * используется для вычисления значения фракталов для пикселей строк.
+         * Разница с прошлыми лабораторными в том, что теперь данные действия будут происходить в отдельном потоке.
+         */
+        @Override
+        public Object doInBackground() throws Exception {
+            rgb = new int[displaySize];
+            for (int i = 0; i < displaySize; i++){
+                int num = fractal.numIterations(FractalGenerator.getCoord (range.x, range.x + range.width, displaySize, i), FractalGenerator.getCoord (range.y, range.y + range.height, displaySize, yCoord));
+                if (num == -1) {
+                    rgb[i] = 0;
+                } else {
+                    float hue = 0.7f + (float) num / 200f;
+                    int rgbColor = Color.HSBtoRGB(hue, 1f, 1f);
+                    rgb[i] = rgbColor;
+                }
+                display.drawPixel(i, yCoord, rgb[i]);
+            }
+            return null;
+        }
+        /**
+         * Переопределение метода из SwingWorker.
+         * Добавляет отрисованные строки и уменьшает значение переменной rowsRemaining
+         */
+        @Override
+        protected void done() {
+            display.repaint(0, 0, yCoord, displaySize, 1);
+            rowsRemaining--;
+            if (rowsRemaining == 0)
+                enableUI(true);
+        }
+
+    }
     public static void main(String[] args)
     {
         FractalExplorer displayExplorer = new FractalExplorer(600);
